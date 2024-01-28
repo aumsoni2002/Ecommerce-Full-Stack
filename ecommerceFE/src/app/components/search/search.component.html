@@ -1,0 +1,19 @@
+<div class="form-header">
+  <input
+    #myInput
+    class="au-input au-input-xl"
+    type="text"
+    placeholder="Search for products ..."
+    (keyup.enter)="doSearch(myInput.value)"
+  />
+  <button class="au-btn-submit" (click)="doSearch(myInput.value)">
+    Search
+  </button>
+</div>
+
+<!--
+    Event Binding: (keyup.enter)="doSearch(myInput.value)" 
+    (keyup.enter) - It will listen for only 'enter' key once pressed and leave
+    doSearch(myInput.value) - This method that we created in ts file will be called once the enter button is hit
+    #myInput - We have put a reference on that input so that we can have access to the value that is entered in that input
+-->
