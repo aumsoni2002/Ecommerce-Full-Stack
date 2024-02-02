@@ -808,7 +808,7 @@ table.table.table-bordered th {
 }
 
 a.primary-btn {
-    background: #05143f;
+    background: #8C1627;
     padding: 7px 20px;
     text-align: center;
     display: inline-block;
@@ -819,7 +819,7 @@ a.primary-btn {
 }
 
 a.primary-btn:hover {
-    background: #0da8e4;
+    background: #DE6D2E;
     color: #fff
 }
 

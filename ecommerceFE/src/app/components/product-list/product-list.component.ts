@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../common/product';
 import { ActivatedRoute } from '@angular/router';
+import { CartItem } from '../../common/cart-item';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-product-list',
@@ -25,7 +27,8 @@ export class ProductListComponent implements OnInit {
   // To make use of services that we create, we first must inject them like below into our component
   constructor(
     private ProductService: ProductService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -119,5 +122,11 @@ export class ProductListComponent implements OnInit {
     this.thePageSize = +pageSize; // converting string to number by using + operator
     this.thePageNumber = 1;
     this.listProducts();
+  }
+
+  // Sending the product that user wants to add to cart
+  addToCart(theProduct: Product) {
+    const theCartItem = new CartItem(theProduct);
+    this.cartService.addToCart(theCartItem);
   }
 }
