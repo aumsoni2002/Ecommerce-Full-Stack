@@ -96,4 +96,27 @@ export class CartService {
     );
     console.log('----');
   }
+
+  // Below method takes a cart item and decreases its quantity by one
+  // If there is only 1 quantity of that product, it calls the remove method to remove the product from the cart
+  decrementQuantity(theCartItem: CartItem) {
+    theCartItem.quantity--;
+    if (theCartItem.quantity === 0) {
+      this.remove(theCartItem);
+    } else {
+      this.computeCartTotals();
+    }
+  }
+
+  remove(theCartItem: CartItem) {
+    const itemIndex = this.cartItems.findIndex(
+      (tempCartItem) => tempCartItem.id === theCartItem.id
+    );
+
+    if (itemIndex > -1) {
+      console.log('remove called');
+      this.cartItems.splice(itemIndex, 1);
+      this.computeCartTotals();
+    }
+  }
 }
