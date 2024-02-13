@@ -1,7 +1,9 @@
 package com.project.ecommerceBE.config;
 
+import com.project.ecommerceBE.entity.Country;
 import com.project.ecommerceBE.entity.Product;
 import com.project.ecommerceBE.entity.ProductCategory;
+import com.project.ecommerceBE.entity.State;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,34 +27,38 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
     public MyDataRestConfig(EntityManager theEntityManager) { // injecting the jpa entity manager
         this.entityManager = theEntityManager;      // saving the injected entity manager into our private variable of type EntityManager
     }
+
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         // First we will create a list of HTTP Methods that we want to disable
         HttpMethod[] theUnsupportedActions = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE};
 
         // Product: Now we will write code for disabling the above listed HTTP Actions.
-        config.getExposureConfiguration()
-                // here we are declaring which classes we want to disable these actions for.
-                .forDomainType(Product.class)
-                // here we are first disabling the actions for one item.
-                .withItemExposure((metdata, httpMethods) -> httpMethods.disable(theUnsupportedActions))
-                // here we are then disabling the actions for collection of items.
-                .withCollectionExposure((metdata, httpMethods) -> httpMethods.disable(theUnsupportedActions));
+        disableHttpMethods(Product.class, config, theUnsupportedActions);
 
-        // Product: Now we will write code for disabling the above listed HTTP Actions.
-        config.getExposureConfiguration()
-                // here we are declaring which classes we want to disable these actions for.
-                .forDomainType(ProductCategory.class)
-                // here we are first disabling the actions for one item.
-                .withItemExposure((metdata, httpMethods) -> httpMethods.disable(theUnsupportedActions))
-                // here we are then disabling the actions for collection of items.
-                .withCollectionExposure((metdata, httpMethods) -> httpMethods.disable(theUnsupportedActions));
+        // ProductCategory: Now we will write code for disabling the above listed HTTP Actions.
+        disableHttpMethods(ProductCategory.class, config, theUnsupportedActions);
+
+        // ProductCategory: Now we will write code for disabling the above listed HTTP Actions.
+        disableHttpMethods(Country.class, config, theUnsupportedActions);
+
+        // ProductCategory: Now we will write code for disabling the above listed HTTP Actions.
+        disableHttpMethods(State.class, config, theUnsupportedActions);
 
         // By default, JpaRepository or Spring Data REST does not expose ids from the database of any entities(tables)
         // We must do it manually by below following method whenever we need to make use of it.
-
         // calling an internal helper method to expose the ids
         exposeIds(config);
+    }
+
+    private static void disableHttpMethods(Class theClass, RepositoryRestConfiguration config, HttpMethod[] theUnsupportedActions) {
+        config.getExposureConfiguration()
+                // here we are declaring which classes we want to disable these actions for.
+                .forDomainType(theClass)
+                // here we are first disabling the actions for one item.
+                .withItemExposure((metdata, httpMethods) -> httpMethods.disable(theUnsupportedActions))
+                // here we are then disabling the actions for collection of items.
+                .withCollectionExposure((metdata, httpMethods) -> httpMethods.disable(theUnsupportedActions));
     }
 
     private void exposeIds(RepositoryRestConfiguration config) {
@@ -66,7 +72,7 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         List<Class> entityClasses = new ArrayList<>(); // creating an array to add all entity types in this list.
 
         // Getting the entity types for each and every entity
-        for (EntityType tempEntityType: entities) {
+        for (EntityType tempEntityType : entities) {
             entityClasses.add(tempEntityType.getJavaType());
         }
 
