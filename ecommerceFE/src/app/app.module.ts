@@ -17,6 +17,14 @@ import { CartStatusComponent } from './components/cart-status/cart-status.compon
 import { CartDetailsComponent } from './components/cart-details/cart-details.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { LoginComponent } from './components/login/login.component';
+import { LoginStatusComponent } from './components/login-status/login-status.component';
+import { OktaAuthModule, OKTA_CONFIG } from '@okta/okta-angular';
+import { OktaAuth } from '@okta/okta-auth-js';
+import myAppConfig from './config/my-app-config';
+
+const oktaConfig = myAppConfig.oidc;
+const oktaAuth = new OktaAuth(oktaConfig);
 
 @NgModule({
   declarations: [
@@ -28,6 +36,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     CartStatusComponent,
     CartDetailsComponent,
     CheckoutComponent,
+    LoginComponent,
+    LoginStatusComponent,
   ],
   imports: [
     BrowserModule,
@@ -35,10 +45,12 @@ import { ReactiveFormsModule } from '@angular/forms';
     HttpClientModule, // we must import this module to make use of its HTTP Methods such as GET, POST, PUT, DELETE...
     NgbModule,
     ReactiveFormsModule,
+    OktaAuthModule,
   ],
   providers: [
     provideClientHydration(),
     ProductService, // Here we must mention all the services that we make use of. This allows us to inject those services into other parts of our application
+    { provide: OKTA_CONFIG, useValue: { oktaAuth } },
   ],
   bootstrap: [AppComponent],
 })
