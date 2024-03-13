@@ -16,7 +16,24 @@ export class CartService {
   totalPrice: Subject<number> = new BehaviorSubject<number>(0);
   totalQuantity: Subject<number> = new BehaviorSubject<number>(0);
 
-  constructor() {}
+  // we will me making use of session storage to store the cart items so that if the user refreshes the page, the cart does not loose all the items.
+  // storage: Storage = sessionStorage;
+  storage: Storage = localStorage;
+
+  constructor() {
+    // upon instantiating a component, we must first get all the cart items from the session storage and put them back into the cart
+    // reading data from storage
+    // the data is always stored in the form of JSON in local or session storage so we must parse it first to make use of it.
+    let data = JSON.parse(this.storage.getItem('cartItems'));
+
+    // If there is some cart items in the session storage, we will put them in the cartItems array.
+    if (data != null) {
+      this.cartItems = data;
+
+      // Now that we have the data in the cartItems array, we will call the computeCartTotals to again show that data in cart status.
+      this.computeCartTotals();
+    }
+  }
 
   // Below is the main method for adding a new or existing product to the cart.
   // The method first takes the product and does below following tasks
@@ -78,6 +95,9 @@ export class CartService {
 
     // Console logging Cart data for debugging purpose
     this.logCartData(totalPriceValue, totalQuantityValue);
+
+    // persisting cart items into the session storage
+    this.persistCartItems();
   }
 
   // Below method just console log the items in the Cart
@@ -118,5 +138,10 @@ export class CartService {
       this.cartItems.splice(itemIndex, 1);
       this.computeCartTotals();
     }
+  }
+
+  persistCartItems() {
+    // the local or session storage only stores JSON Format data, so must convert any data to JSON format before saving inside it.
+    this.storage.setItem('cartItems', JSON.stringify(this.cartItems));
   }
 }
