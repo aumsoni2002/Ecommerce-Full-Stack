@@ -10,6 +10,11 @@
     background: #DE6D2E
 }
 
+.security-btn:hover {
+    background: #FFC632;
+    border: #FFC632
+}
+
 .login-status-header {
     display: -webkit-box;
     display: -webkit-flex;
@@ -28,5 +33,6 @@
     -webkit-transition: all .5s ease;
     -o-transition: all .5s ease;
     -moz-transition: all .5s ease;
-    transition: all .5s ease
+    transition: all .5s ease;
+    color: white;
 }

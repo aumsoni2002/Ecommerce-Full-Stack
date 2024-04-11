@@ -4,15 +4,16 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Product } from '../common/product';
 import { ProductCategory } from '../common/product-category';
+import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
   // by default Spring Data REST sends only 20 items per request which we can change by adding a 'size' parameter
-  private baseUrl = 'http://localhost:8080/api/products';
+  private baseUrl = environment['eCommerceApiUrl'] + '/products';
 
-  private categoryUrl = 'http://localhost:8080/api/product-category';
+  private categoryUrl = environment['eCommerceApiUrl'] + '/product-category';
 
   constructor(private httpClient: HttpClient) {}
 
@@ -90,7 +91,6 @@ export class ProductService {
       `&page=${thePage}&size=${thePageSize}`;
     return this.httpClient.get<GetResponseProduct>(searchUrl);
   }
-
 }
 
 // Below both interfaces helps us into unwrapping the coming JSON data into an array of object so that we can access that data into our application

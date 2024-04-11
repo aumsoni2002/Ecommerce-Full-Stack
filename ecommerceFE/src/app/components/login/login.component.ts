@@ -24,10 +24,10 @@ export class LoginComponent implements OnInit {
         issuer: myAppConfig.oidc.issuer,
         scopes: myAppConfig.oidc.scopes,
       },
-      features: {
-        registration: true, // Enable Self Service Registration
-      },
-    });
+      // features: {
+      //   registration: true, // Enable Self Service Registration
+      // },
+    }); 
   }
   ngOnInit(): void {
     // this will remove any previous signed in user.

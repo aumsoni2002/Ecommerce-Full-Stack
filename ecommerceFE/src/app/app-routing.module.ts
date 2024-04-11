@@ -8,6 +8,7 @@ import { OktaAuthGuard, OktaCallbackComponent } from '@okta/okta-angular';
 import { LoginComponent } from './components/login/login.component';
 import { MembersPageComponent } from './components/members-page/members-page.component';
 import { OktaAuth } from '@okta/okta-auth-js';
+import { OrderHistoryComponent } from './components/order-history/order-history.component';
 function sendToLoginPage(OktaAuth: OktaAuth, injector: Injector) {
   // Making use of injector to access any service available within your application
   const router = injector.get(Router);
@@ -18,6 +19,12 @@ function sendToLoginPage(OktaAuth: OktaAuth, injector: Injector) {
 
 const routes: Routes = [
   // Below are the list of routes that we will use to create new instance of component once hit
+  {
+    path: 'order-history',
+    component: OrderHistoryComponent,
+    canActivate: [OktaAuthGuard],
+    data: { onAuthRequired: sendToLoginPage },
+  },
   {
     path: 'members',
     component: MembersPageComponent,

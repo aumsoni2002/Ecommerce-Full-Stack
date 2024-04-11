@@ -1,12 +1,10 @@
 package com.project.ecommerceBE.config;
 
-import com.project.ecommerceBE.entity.Country;
-import com.project.ecommerceBE.entity.Product;
-import com.project.ecommerceBE.entity.ProductCategory;
-import com.project.ecommerceBE.entity.State;
+import com.project.ecommerceBE.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
@@ -20,6 +18,9 @@ import java.util.Set;
 @Configuration
 public class MyDataRestConfig implements RepositoryRestConfigurer {
 
+    @Value("${allowed.origins}")
+    private String[] theAllowedOrigins;
+
     // Auto wiring JPA Entity Manager to have access to all entities(tables) that are in our database
     private EntityManager entityManager;
 
@@ -31,7 +32,7 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         // First we will create a list of HTTP Methods that we want to disable
-        HttpMethod[] theUnsupportedActions = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE};
+        HttpMethod[] theUnsupportedActions = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE, HttpMethod.PATCH};
 
         // Product: Now we will write code for disabling the above listed HTTP Actions.
         disableHttpMethods(Product.class, config, theUnsupportedActions);
@@ -39,16 +40,24 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         // ProductCategory: Now we will write code for disabling the above listed HTTP Actions.
         disableHttpMethods(ProductCategory.class, config, theUnsupportedActions);
 
-        // ProductCategory: Now we will write code for disabling the above listed HTTP Actions.
+        // Country: Now we will write code for disabling the above listed HTTP Actions.
         disableHttpMethods(Country.class, config, theUnsupportedActions);
 
-        // ProductCategory: Now we will write code for disabling the above listed HTTP Actions.
+        // State: Now we will write code for disabling the above listed HTTP Actions.
         disableHttpMethods(State.class, config, theUnsupportedActions);
+
+        // Order: Now we will write code for disabling the above listed HTTP Actions.
+        disableHttpMethods(Order.class, config, theUnsupportedActions);
+
 
         // By default, JpaRepository or Spring Data REST does not expose ids from the database of any entities(tables)
         // We must do it manually by below following method whenever we need to make use of it.
         // calling an internal helper method to expose the ids
         exposeIds(config);
+
+        // CorsRegistry cors: this parameter will help us in adding cross-origin resource mapping between our
+        // backend exposed REST APIs and our frontend localhost running URL that is /api/** with the localhost:4200
+        cors.addMapping(config.getBasePath() + "/**").allowedOrigins(theAllowedOrigins);
     }
 
     private static void disableHttpMethods(Class theClass, RepositoryRestConfiguration config, HttpMethod[] theUnsupportedActions) {

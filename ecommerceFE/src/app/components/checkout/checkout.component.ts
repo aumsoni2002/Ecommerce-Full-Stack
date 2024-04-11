@@ -15,6 +15,8 @@ import { Router } from '@angular/router';
 import { Order } from '../../common/order';
 import { OrderItem } from '../../common/order-item';
 import { Purchase } from '../../common/purchase';
+import { environment } from '../../../environments/environment.development';
+import { PaymentInfo } from '../../common/payment-info';
 
 @Component({
   selector: 'app-checkout',
@@ -34,6 +36,17 @@ export class CheckoutComponent implements OnInit {
 
   shippingAddressStates: State[] = [];
   billingAddressStates: State[] = [];
+
+  storage: Storage = sessionStorage;
+
+  // Initializing Stripe API
+  stripe = Stripe(environment.stripePublishableKey);
+
+  paymentInfo: PaymentInfo = new PaymentInfo();
+  cardElement: any;
+  displayError: any = '';
+
+  isDisabled: boolean = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -110,6 +123,12 @@ export class CheckoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Setting-up Stripe payment form
+    this.setupStripePaymentForm();
+
+    // reading the user's email from web browser storage
+    const theEmail = JSON.parse(this.storage.getItem('userEmail')!);
+
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
         firstName: new FormControl('', [
@@ -122,7 +141,7 @@ export class CheckoutComponent implements OnInit {
           Validators.minLength(2),
           CustomValidators.notOnlyWhiteSpace,
         ]),
-        email: new FormControl('', [
+        email: new FormControl(theEmail, [
           Validators.required,
           Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$'),
         ]),
@@ -162,39 +181,39 @@ export class CheckoutComponent implements OnInit {
         ]),
       }),
       creditCard: this.formBuilder.group({
-        cardType: new FormControl('', [Validators.required]),
-        nameOnCard: new FormControl('', [
-          Validators.required,
-          Validators.minLength(2),
-          CustomValidators.notOnlyWhiteSpace,
-        ]),
-        cardNumber: new FormControl('', [
-          Validators.required,
-          Validators.pattern('[0-9]{16}'),
-        ]),
-        securityCode: new FormControl('', [
-          Validators.required,
-          Validators.pattern('[0-9]{3}'),
-        ]),
-        expirationMonth: new FormControl(new Date().getMonth() + 1),
-        expirationYear: new FormControl(new Date().getFullYear()),
+        // cardType: new FormControl('', [Validators.required]),
+        // nameOnCard: new FormControl('', [
+        //   Validators.required,
+        //   Validators.minLength(2),
+        //   CustomValidators.notOnlyWhiteSpace,
+        // ]),
+        // cardNumber: new FormControl('', [
+        //   Validators.required,
+        //   Validators.pattern('[0-9]{16}'),
+        // ]),
+        // securityCode: new FormControl('', [
+        //   Validators.required,
+        //   Validators.pattern('[0-9]{3}'),
+        // ]),
+        // expirationMonth: new FormControl(new Date().getMonth() + 1),
+        // expirationYear: new FormControl(new Date().getFullYear()),
       }),
     });
 
     // Populate drop-down for the input expirationMonth
     // First we need the current month to send it our service method.
     // Now below javascript method to get current month is 0 based which it gives number from 0 to 11, that is why we need to add 1 to it.
-    const startMonth: number = new Date().getMonth() + 1;
-    this.eCommerceFormService
-      .getCreditCardMonths(startMonth)
-      .subscribe((data) => {
-        this.creditCardMonths = data;
-      });
+    // const startMonth: number = new Date().getMonth() + 1;
+    // this.eCommerceFormService
+    //   .getCreditCardMonths(startMonth)
+    //   .subscribe((data) => {
+    //     this.creditCardMonths = data;
+    //   });
 
-    // Populate drop-down for the input expirationYear
-    this.eCommerceFormService.getCreditCardYears().subscribe((data) => {
-      this.creditCardYears = data;
-    });
+    // // Populate drop-down for the input expirationYear
+    // this.eCommerceFormService.getCreditCardYears().subscribe((data) => {
+    //   this.creditCardYears = data;
+    // });
 
     // Populate drop-down for the input countries
     this.eCommerceFormService.getCountries().subscribe((data) => {
@@ -203,6 +222,30 @@ export class CheckoutComponent implements OnInit {
 
     // calling reviewCartDetails write after the component gets instantiated
     this.reviewCartDetails();
+  }
+
+  setupStripePaymentForm() {
+    // get a handle to stripe elements
+    var elements = this.stripe.elements();
+
+    // Create a card element ... and hide the zip-code field
+    this.cardElement = elements.create('card', { hidePostalCode: true });
+
+    // Add an instance of card UI component into the 'card-element' div
+    this.cardElement.mount('#card-element');
+
+    // Add event binding for the 'change' event on the card element
+    this.cardElement.on('change', (event: any) => {
+      // get a handle to card-errors element
+      this.displayError = document.getElementById('card-errors');
+
+      if (event.complete) {
+        this.displayError.textContent = '';
+      } else if (event.error) {
+        // show validation error to customer
+        this.displayError.textContent = event.error.message;
+      }
+    });
   }
 
   copyShippingAddressToBillingAddress(event: Event) {
@@ -219,39 +262,39 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
-  handleMonthsAndYears() {
-    // first we need to have to access to creditCard FormGroup then we can have access to its FormControl 'expirationYear'
-    const creditCardFormGroup = this.checkoutFormGroup.get('creditCard');
+  // handleMonthsAndYears() {
+  //   // first we need to have to access to creditCard FormGroup then we can have access to its FormControl 'expirationYear'
+  //   const creditCardFormGroup = this.checkoutFormGroup.get('creditCard');
 
-    const currentYear: number = new Date().getFullYear();
-    const selectedYear: number = Number(
-      creditCardFormGroup.value.expirationYear
-    );
+  //   const currentYear: number = new Date().getFullYear();
+  //   const selectedYear: number = Number(
+  //     creditCardFormGroup.value.expirationYear
+  //   );
 
-    // Now that we have the current year and the selected year, we can check if the year that user has selected is current year, we will
-    // only show remaining months of the year. If it is a future year, we will show all 12 months.
-    let startMonth: number;
-    if (currentYear === selectedYear) {
-      startMonth = new Date().getMonth() + 1; // In javascript the months given by this built-in library are 0 based.
-    } else {
-      startMonth = 1;
-    }
-    this.eCommerceFormService
-      .getCreditCardMonths(startMonth)
-      .subscribe((data) => {
-        this.creditCardMonths = data;
-      });
-    // console.log(creditCardFormGroup.value.expirationYear);
-    if (
-      creditCardFormGroup.value.expirationMonth <= new Date().getMonth() &&
-      currentYear === selectedYear
-    ) {
-      const expirationMonthControl = this.checkoutFormGroup.get(
-        'creditCard.expirationMonth'
-      );
-      expirationMonthControl.patchValue(new Date().getMonth() + 1);
-    }
-  }
+  //   // Now that we have the current year and the selected year, we can check if the year that user has selected is current year, we will
+  //   // only show remaining months of the year. If it is a future year, we will show all 12 months.
+  //   let startMonth: number;
+  //   if (currentYear === selectedYear) {
+  //     startMonth = new Date().getMonth() + 1; // In javascript the months given by this built-in library are 0 based.
+  //   } else {
+  //     startMonth = 1;
+  //   }
+  //   this.eCommerceFormService
+  //     .getCreditCardMonths(startMonth)
+  //     .subscribe((data) => {
+  //       this.creditCardMonths = data;
+  //     });
+  //   // console.log(creditCardFormGroup.value.expirationYear);
+  //   if (
+  //     creditCardFormGroup.value.expirationMonth <= new Date().getMonth() &&
+  //     currentYear === selectedYear
+  //   ) {
+  //     const expirationMonthControl = this.checkoutFormGroup.get(
+  //       'creditCard.expirationMonth'
+  //     );
+  //     expirationMonthControl.patchValue(new Date().getMonth() + 1);
+  //   }
+  // }
 
   // Showing states as per the user selected country
   getStates(formGroupName: string) {
@@ -286,6 +329,7 @@ export class CheckoutComponent implements OnInit {
     this.cartService.cartItems = [];
     this.cartService.totalPrice.next(0);
     this.cartService.totalQuantity.next(0);
+    this.cartService.persistCartItems();
 
     // Resetting the form
     this.checkoutFormGroup.reset();
@@ -349,19 +393,88 @@ export class CheckoutComponent implements OnInit {
     purchase.order = order;
     purchase.orderItems = orderItems;
 
-    // Calling REST API via the CheckoutService
-    this.checkoutService.placeOrder(purchase).subscribe({
-      next: (response) => {
-        alert(
-          `Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`
-        );
+    // Computing payment info
+    this.paymentInfo.amount = Math.round(this.totalPrice * 100);
+    this.paymentInfo.currency = 'USD';
+    this.paymentInfo.receiptEmail = purchase.customer.email;
 
-        // Once the order has been placed, we will reset the cart
-        this.resetCart();
-      },
-      error: (err) => {
-        alert(`There was an error while placing your order: ${err.message}`);
-      },
-    });
+    // Calling REST API via the CheckoutService
+    // this.checkoutService.placeOrder(purchase).subscribe({
+    //   next: (response) => {
+    //     alert(
+    //       `Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`
+    //     );
+
+    //     // Once the order has been placed, we will reset the cart
+    //     this.resetCart();
+    //   },
+    //   error: (err) => {
+    //     alert(`There was an error while placing your order: ${err.message}`);
+    //   },
+    // });
+
+    // if the filled form is valid then
+    // - create payment intent
+    // - confirm card payment
+    // - place order
+
+    if (
+      !this.checkoutFormGroup.invalid &&
+      this.displayError.textContent === ''
+    ) {
+      this.isDisabled = true;
+      this.checkoutService
+        .createPaymentIntent(this.paymentInfo)
+        .subscribe((paymentIntentResponse) => {
+          this.stripe
+            .confirmCardPayment(
+              paymentIntentResponse.client_secret,
+              {
+                payment_method: {
+                  card: this.cardElement,
+                  billing_details: {
+                    email: purchase.customer.email,
+                    name: `${purchase.customer.firstName} ${purchase.customer.lastName}`,
+                    address: {
+                      line1: purchase.billingAddress.street,
+                      city: purchase.billingAddress.city,
+                      state: purchase.billingAddress.state,
+                      postal_code: purchase.billingAddress.zipCode,
+                      country: this.billingAddressCountry.value.code,
+                    },
+                  },
+                },
+              },
+              { handleActions: false }
+            )
+            .then((result: any) => {
+              if (result.error) {
+                // inform the customer there was an error
+                alert(`There was an error: ${result.error.message}`);
+                this.isDisabled = false;
+              } else {
+                // call REST API via the CheckoutService
+                this.checkoutService.placeOrder(purchase).subscribe({
+                  next: (response: any) => {
+                    alert(
+                      `Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`
+                    );
+
+                    // reset cart
+                    this.resetCart();
+                    this.isDisabled = false;
+                  },
+                  error: (err: any) => {
+                    alert(`There was an error: ${err.message}`);
+                    this.isDisabled = false;
+                  },
+                });
+              }
+            });
+        });
+    } else {
+      this.checkoutFormGroup.markAllAsTouched();
+      return;
+    }
   }
 }

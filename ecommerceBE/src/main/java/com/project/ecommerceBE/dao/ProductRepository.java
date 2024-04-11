@@ -5,9 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@CrossOrigin("http://localhost:4200")
+@RepositoryRestResource
 public interface ProductRepository extends JpaRepository<Product, Long> {
     // Spring Data REST and Spring JPA has built-in queries that we can use by using names like findBy, searchBy, queryBy etc.
     // We do not need to write any queries if we want to perform simple operations.
