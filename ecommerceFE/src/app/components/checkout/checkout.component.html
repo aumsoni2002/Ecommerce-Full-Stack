@@ -95,6 +95,7 @@
                 <select
                   formControlName="country"
                   (change)="getStates('shippingAddress')"
+                  [(ngModel)]="defaultCountry"
                 >
                   <option *ngFor="let country of countries" [ngValue]="country">
                     {{ country.name }}
@@ -169,13 +170,23 @@
             <div class="col-md-2"><label>State</label></div>
             <div class="col-md-9">
               <div class="input-space">
-                <select formControlName="state">
-                  <option
-                    *ngFor="let state of shippingAddressStates"
-                    [ngValue]="state"
+                <select formControlName="state" [(ngModel)]="defaultState">
+                  <ng-container
+                    *ngIf="
+                      shippingAddressStates && shippingAddressStates.length > 0;
+                      else defaultStateTemplate
+                    "
                   >
-                    {{ state.name }}
-                  </option>
+                    <option
+                      *ngFor="let state of shippingAddressStates"
+                      [ngValue]="state"
+                    >
+                      {{ state.name }}
+                    </option>
+                  </ng-container>
+                  <ng-template #defaultStateTemplate>
+                    <option [ngValue]="defaultState">{{ defaultState }}</option>
+                  </ng-template>
                 </select>
                 <div
                   *ngIf="
@@ -320,12 +331,22 @@
             <div class="col-md-9">
               <div class="input-space">
                 <select formControlName="state">
-                  <option
-                    *ngFor="let state of billingAddressStates"
-                    [ngValue]="state"
+                  <ng-container
+                    *ngIf="
+                      billingAddressStates && billingAddressStates.length > 0;
+                      else defaultBillingStateTemplate
+                    "
                   >
-                    {{ state.name }}
-                  </option>
+                    <option
+                      *ngFor="let state of billingAddressStates"
+                      [ngValue]="state"
+                    >
+                      {{ state.name }}
+                    </option>
+                  </ng-container>
+                  <ng-template #defaultBillingStateTemplate>
+                    <option [ngValue]="defaultBillingState">{{ defaultBillingState }}</option>
+                  </ng-template>
                 </select>
                 <div
                   *ngIf="

@@ -33,9 +33,13 @@ export class CheckoutComponent implements OnInit {
   creditCardYears: number[] = [];
 
   countries: Country[] = [];
+  country: Country;
+  defaultCountry: Country;
 
   shippingAddressStates: State[] = [];
   billingAddressStates: State[] = [];
+  defaultState: string;
+  defaultBillingState: string;
 
   storage: Storage = sessionStorage;
 
@@ -128,15 +132,22 @@ export class CheckoutComponent implements OnInit {
 
     // reading the user's email from web browser storage
     const theEmail = JSON.parse(this.storage.getItem('userEmail')!);
+    const theFirstName = JSON.parse(this.storage.getItem('userFirstName')!);
+    const theLastName = JSON.parse(this.storage.getItem('userLastName')!);
+    const streetAddress = JSON.parse(this.storage.getItem('streetAddress')!);
+    const city = JSON.parse(this.storage.getItem('city')!);
+    this.defaultState = JSON.parse(this.storage.getItem('state')!);
+    const zipCode = JSON.parse(this.storage.getItem('zipCode')!);
+    const countryCode = JSON.parse(this.storage.getItem('countryCode')!);
 
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
-        firstName: new FormControl('', [
+        firstName: new FormControl(theFirstName, [
           Validators.required,
           Validators.minLength(2),
           CustomValidators.notOnlyWhiteSpace,
         ]),
-        lastName: new FormControl('', [
+        lastName: new FormControl(theLastName, [
           Validators.required,
           Validators.minLength(2),
           CustomValidators.notOnlyWhiteSpace,
@@ -147,17 +158,17 @@ export class CheckoutComponent implements OnInit {
         ]),
       }),
       shippingAddress: this.formBuilder.group({
-        street: new FormControl('', [
+        street: new FormControl(streetAddress, [
           Validators.required,
           CustomValidators.notOnlyWhiteSpace,
         ]),
-        city: new FormControl('', [
+        city: new FormControl(city, [
           Validators.required,
           CustomValidators.notOnlyWhiteSpace,
         ]),
         state: new FormControl('', [Validators.required]),
         country: new FormControl('', [Validators.required]),
-        zipCode: new FormControl('', [
+        zipCode: new FormControl(zipCode, [
           Validators.required,
           Validators.minLength(2),
           CustomValidators.notOnlyWhiteSpace,
@@ -218,6 +229,12 @@ export class CheckoutComponent implements OnInit {
     // Populate drop-down for the input countries
     this.eCommerceFormService.getCountries().subscribe((data) => {
       this.countries = data;
+
+      // Find country name from countries array
+      this.country = this.countries.find((c) => c.code === countryCode);
+      if (this.country) {
+        this.defaultCountry = this.country; // Set defaultCountry
+      }
     });
 
     // calling reviewCartDetails write after the component gets instantiated
@@ -250,15 +267,16 @@ export class CheckoutComponent implements OnInit {
 
   copyShippingAddressToBillingAddress(event: Event) {
     const isChecked = (<HTMLInputElement>event.target).checked;
-
     if (isChecked) {
       this.checkoutFormGroup.controls['billingAddress'].setValue(
         this.checkoutFormGroup.controls['shippingAddress'].value
       );
       this.billingAddressStates = this.shippingAddressStates;
+      this.defaultBillingState = this.defaultState;
     } else {
       this.checkoutFormGroup.controls['billingAddress'].reset();
       this.billingAddressStates = [];
+      this.defaultBillingState = '';
     }
   }
 

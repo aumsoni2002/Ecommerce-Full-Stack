@@ -12,7 +12,7 @@
 
 .security-btn:hover {
     background: #FFC632;
-    border: #FFC632
+    border: 10px solid #FFC632;
 }
 
 .login-status-header {
