@@ -174,7 +174,7 @@ Before you begin, ensure you have met the following requirements:
     C = US
     ST = Pennsylvania
     L = Philadelphia
-    O = luv2code
+    O = ecommerce
     OU = Training
     CN = localhost
     ```
