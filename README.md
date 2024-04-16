@@ -209,7 +209,7 @@ Before you begin, ensure you have met the following requirements:
 
 2. Run the following command to generate the key and certificate:
     ```bash
-    keytool -genkeypair -alias ecommerce -keystore src/main/resources/ecommerce-keystore.p12 -keypass secret -storeType PKCS12 -storepass secret -keyalg RSA -keysize 2048 -validity 365 -dname "C=US, ST=Pennsylvania, L=Philadelphia, O=luv2code, OU=Training Backend, CN=localhost" -ext "SAN=dns:localhost"
+    keytool -genkeypair -alias ecommerce -keystore src/main/resources/ecommerce-keystore.p12 -keypass secret -storeType PKCS12 -storepass secret -keyalg RSA -keysize 2048 -validity 365 -dname "C=US, ST=Pennsylvania, L=Philadelphia, O=ecommerce, OU=Training Backend, CN=localhost" -ext "SAN=dns:localhost"
     ```
 
     | Argument | Description |
@@ -248,10 +248,10 @@ Before you begin, ensure you have met the following requirements:
     server.ssl.enabled=true
     
     # Key alias
-    server.ssl.key-alias=luv2code
+    server.ssl.key-alias=ecommerce
     
     # Keystore location
-    server.ssl.key-store=classpath:luv2code-keystore.p12
+    server.ssl.key-store=classpath:ecommerce-keystore.p12
     
     # Keystore password
     server.ssl.key-store-password=secret
