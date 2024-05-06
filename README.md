@@ -1,6 +1,18 @@
-# ECommerce Full Stack Application
+# E-Commerce Full Stack Application
 
-This is an ECommerce Full Stack Application developed using Angular for the frontend, Spring Boot for the backend, and MySQL for the database.
+This full-stack e-commerce platform is built using Angular, Spring Boot, MySQL, Okta, and Stripe, offering a comprehensive suite of features for seamless online shopping experiences.
+
+## Features
+
+- **CRUD Operations:** Perform Create, Read, Update, and Delete operations for products and orders.
+- **Authentication:** Secure user login/logout functionality using Okta authentication services.
+- **Payment Processing:** Integration with Stripe payment gateway for secure and reliable transaction processing.
+- **Dynamic Search:** Filter products by category and keyword for enhanced product discovery.
+- **Pagination:** Efficiently manage large datasets with pagination for smoother navigation.
+- **Shopping Cart:** Add, remove, and update item quantities in the shopping cart for a seamless shopping experience.
+- **Secure Checkout:** Secure and validated checkout form for accurate and secure order submissions.
+- **HTTPS Communication:** Encryption of data transmission between frontend and backend for enhanced security.
+- **Email Receipts:** Integration with Stripe for email receipts to provide customers with confirmation of their purchases.
 
 ---
 
