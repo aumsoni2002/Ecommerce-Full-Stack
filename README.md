@@ -17,7 +17,7 @@ This full-stack e-commerce platform is built using Angular, Spring Boot, MySQL, 
 ---
 
 ## Video Demonstration
-[![Watch the video](https://img.youtube.com/vi/8vKVjTUL_XQ/0.jpg)](https://youtu.be/8vKVjTUL_XQ)
+https://github.com/aumsoni2002/Ecommerce-Full-Stack/assets/96745193/1dbd81f9-263f-46d9-bc9e-320f8418b295
 
 ---
 
